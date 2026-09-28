@@ -80,5 +80,14 @@ const memories = [
     video: "assets/videos/Preset 9_16 [8A4B850].mp4",
     thumbnail: "assets/images/thumb-preset.jpg",
     description: "Video JJ jedag-jedug preset aesthetic berdua."
-  }
+  }, 
+  {
+    type: "photo",
+    category: "ai",
+    tag: "Photo",
+    title: "Random Photo but make with AI",
+    date: "28 September 2026",
+    image: "assets/images/file_00000000ad5882119f2b1d80d70e3ba1.png",
+    description: "Foto random💕."
+ },
 ];
