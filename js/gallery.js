@@ -54,32 +54,32 @@ const memories = [
   {
     type: "video",
     category: "jj",
-    tag: "JJ Bucin 9:16 🔥",
-    title: "Yuraprst ☕️",
-    date: "28 September 2026",
+    tag: "#1",
+    title: "💕 ❤",
+    date: "26 September 2026",
     video: "assets/videos/Yuraprst☕️ 9_16 [9298052].mp4",
     thumbnail: "assets/images/thumb-yura.jpg",
-    description: "Video JJ jedag-jedug 9:16 aesthetic kita berdua dengan sound favorit."
+    description: "Video JJ Mobile Legend berdua."
   },
   {
     type: "video",
     category: "jj",
-    tag: "JJ Bucin 9:16 ⚡",
-    title: "Proyek Baru 2065 ✨",
-    date: "28 September 2026",
+    tag: "#2",
+    title: "❤ ✨",
+    date: "26 September 2026",
     video: "assets/videos/Proyek Baru 2065 9_16 [2D8E2BF].mp4",
     thumbnail: "assets/images/thumb-proyek.jpg",
-    description: "Kompilasi momen seru dan manis berdua di video JJ reels 9:16."
+    description: "video JJ reels 9:16."
   },
   {
     type: "video",
     category: "jj",
-    tag: "JJ Preset 9:16 🎬",
-    title: "Preset Jedag-Jedug 🎵",
-    date: "28 September 2026",
+    tag: "#3",
+    title: "😖 🎵",
+    date: "21 September 2026",
     video: "assets/videos/Preset 9_16 [8A4B850].mp4",
     thumbnail: "assets/images/thumb-preset.jpg",
-    description: "Video JJ jedag-jedug preset aesthetic berdua."
+    description: "Video JJ berdua."
   }, 
   {
     type: "photo",
