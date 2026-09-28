@@ -8,12 +8,12 @@
 // =====================================
 
 // 1. Your relationship start date (Format: "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS")
-const relationshipStart = "2024-02-14";
+const relationshipStart = "2025-11-01";
 
 // 2. Names of the couple
 const partnerNames = {
-  partnerOne: "Julian",
-  partnerTwo: "Elena"
+  partnerOne: "I'am",
+  partnerTwo: "Viaa"
 };
 
 // =====================================
