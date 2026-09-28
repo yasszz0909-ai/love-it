@@ -21,27 +21,9 @@
 // =====================================
 const specialDates = [
   {
-    date: "2026-02-14",
-    title: "Our Story Officially Began",
+    date: "2026-11-01",
+    title: "Next Our Anniversary",
     description: "Hari indah saat kita resmi memulai perjalanan cinta berdua.",
-    image: "assets/images/hero.jpg"
-  },
-  {
-    date: "2026-09-28",
-    title: "Koleksi Video JJ Berdua",
-    description: "Momen seru pembuatan video jedag-jedug dan reels penuh tawa dan kebahagiaan.",
-    image: "assets/images/thumb-yura.jpg"
-  },
-  {
-    date: "2026-10-14",
-    title: "Monthly Anniversary",
-    description: "Menghitung setiap detik berharga dan merayakan kebersamaan yang terus bertumbuh.",
-    image: "assets/images/thumb-proyek.jpg"
-  },
-  {
-    date: "2026-12-31",
-    title: "Tutup Tahun Bersamamu",
-    description: "Menatap masa depan bersama dengan penuh harapan dan cinta yang selalu ada.",
-    image: "assets/images/thumb-preset.jpg"
+    image: "assets/images/thum_ultah.jpg"
   }
 ];
