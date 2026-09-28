@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OUR LITTLE STORY | Romantic Digital Memory Album</title>
+  <meta name="description" content="A romantic personal memory album and relationship timeline for couples. Two people, one story, countless memories." />
+  <meta property="og:title" content="OUR LITTLE STORY | Romantic Digital Memory Album" />
+  <meta property="og:description" content="A romantic personal memory album and relationship timeline for couples." />
+  <meta property="og:image" content="assets/images/hero.jpg" />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+  <!-- =====================================
+       TOP NAVIGATION BAR
+       ===================================== -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="#home" class="brand-logo">
+        <span class="logo-title">OUR LITTLE STORY</span>
+      </a>
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="desktop-nav" id="desktop-navigation" aria-label="Main Navigation">
+        <ul class="nav-list">
+          <li><a href="#home" class="nav-link active">Home</a></li>
+          <li><a href="#gallery" class="nav-link">Gallery</a></li>
+          <li><a href="#anniversary" class="nav-link">Anniversary</a></li>
+          <li><a href="#songs" class="nav-link">Our Songs</a></li>
+          <li><a href="#letter" class="nav-link">Letter</a></li>
+        </ul>
+      </nav>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button id="mobile-menu-toggle" class="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="site-navigation">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer Navigation -->
+    <nav class="mobile-nav" id="site-navigation" aria-label="Mobile Navigation">
+      <ul class="mobile-nav-list">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#gallery" class="nav-link">Gallery</a></li>
+        <li><a href="#anniversary" class="nav-link">Anniversary</a></li>
+        <li><a href="#songs" class="nav-link">Our Songs</a></li>
+        <li><a href="#letter" class="nav-link">Letter</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- =====================================
+       MAIN CONTENT
+       ===================================== -->
+  <main>
+
+    <!-- SECTION 1: HOME (HERO) -->
+    <section id="home" class="hero-section">
+      <div class="hero-container">
+        
+        <div class="hero-header-text">
+          <span class="hero-eyebrow">A Digital Keepsake</span>
+          <h1 class="hero-main-title">OUR LITTLE STORY</h1>
+          <p class="hero-quote">“Two people, one story, countless memories.”</p>
+        </div>
+
+        <!-- Featured Couple Photo -->
+        <div class="hero-image-wrapper">
+          <div class="hero-image-frame">
+            <img src="assets/images/hero.jpg" alt="Our story together" class="hero-image" priority />
+            <div class="hero-image-vignette"></div>
+          </div>
+        </div>
+
+        <!-- Relationship Counter Card -->
+        <div class="hero-counter-card">
+          <div class="counter-header">
+            <span class="counter-label">Together Since</span>
+            <h2 id="together-since-date" class="counter-date">February 14, 2024</h2>
+          </div>
+
+          <div class="counter-grid">
+            <div class="counter-slot">
+              <span id="counter-years" class="counter-digit">00</span>
+              <span class="counter-unit">Years</span>
+            </div>
+            <div class="counter-slot">
+              <span id="counter-months" class="counter-digit">00</span>
+              <span class="counter-unit">Months</span>
+            </div>
+            <div class="counter-slot">
+              <span id="counter-days" class="counter-digit">00</span>
+              <span class="counter-unit">Days</span>
+            </div>
+            <div class="counter-slot">
+              <span id="counter-hours" class="counter-digit">00</span>
+              <span class="counter-unit">Hours</span>
+            </div>
+            <div class="counter-slot">
+              <span id="counter-minutes" class="counter-digit">00</span>
+              <span class="counter-unit">Minutes</span>
+            </div>
+            <div class="counter-slot">
+              <span id="counter-seconds" class="counter-digit">00</span>
+              <span class="counter-unit">Seconds</span>
+            </div>
+          </div>
+
+          <div class="hero-cta-wrap">
+            <a href="#intro" class="btn-explore">
+              <span>Explore Our Story</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- INTRODUCTION SECTION -->
+    <section id="intro" class="intro-section">
+      <div class="section-container">
+        <div class="intro-editorial">
+          <span class="section-kicker">Welcome To Our World</span>
+          <h2 class="editorial-heading">Every second with you is my favorite chapter.</h2>
+          <div class="editorial-body">
+            <p>
+              This website was lovingly crafted as a quiet sanctuary for all the memories we have gathered together. From early morning conversations over steaming cups of coffee to twilight strolls along the shoreline, every photo, song, and quiet milestone here tells the story of who we are.
+            </p>
+            <p>
+              It is a celebration of our laughter, our quiet comfort, the adventures we have lived, and all the unwritten pages waiting ahead.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: GALLERY -->
+    <section id="gallery" class="gallery-section">
+      <div class="section-container">
+        <div class="section-heading-wrap">
+          <span class="section-kicker">Capturing Every Smile</span>
+          <h2 class="section-title">OUR MEMORIES</h2>
+          <p class="section-subtitle">Kumpulan video JJ bucin, foto couple buatan AI, dan momen random kita berdua.</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="gallery-filter-bar">
+          <button class="gallery-filter-btn active" data-filter="all">SEMUA</button>
+          <button class="gallery-filter-btn" data-filter="video">🎬 JJ & VIDEO</button>
+          <button class="gallery-filter-btn" data-filter="ai">✨ FOTO AI</button>
+          <button class="gallery-filter-btn" data-filter="random">📸 RANDOM MOMEN</button>
+        </div>
+
+        <!-- Dynamic Gallery Grid (Populated via js/gallery.js) -->
+        <div id="gallery-grid" class="gallery-grid">
+          <!-- Rendered by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: ANNIVERSARY & SPECIAL DATES -->
+    <section id="anniversary" class="anniversary-section">
+      <div class="section-container">
+        <div class="section-heading-wrap">
+          <span class="section-kicker">Marking Our Journey</span>
+          <h2 class="section-title">OUR ANNIVERSARY</h2>
+          <p class="section-subtitle">Counting the days, honoring the promises, and celebrating our path.</p>
+        </div>
+
+        <!-- Relationship Banner -->
+        <div class="anniversary-banner">
+          <div class="anniversary-banner-inner">
+            <span class="anniv-subtitle">Together Since</span>
+            <h3 id="anniversary-since-date" class="anniv-date-display">February 14, 2024</h3>
+            <div id="relationship-duration-summary" class="anniv-duration-pill">
+              Calculating our time together...
+            </div>
+          </div>
+        </div>
+
+        <!-- Special Dates Grid Header -->
+        <div class="special-dates-header">
+          <h3 class="special-dates-title">SPECIAL DATES</h3>
+          <p class="special-dates-subtitle">The milestones that changed everything.</p>
+        </div>
+
+        <!-- Dynamic Special Dates (Populated via js/anniversary.js) -->
+        <div id="special-dates-grid" class="special-dates-grid">
+          <!-- Rendered by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: OUR SONGS -->
+    <section id="songs" class="songs-section">
+      <div class="section-container">
+        <div class="section-heading-wrap">
+          <span class="section-kicker">The Soundtrack of Us</span>
+          <h2 class="section-title">OUR SONGS</h2>
+          <p class="section-subtitle">The melodies that echo our favorite drives, dances, and quiet evenings.</p>
+        </div>
+
+        <!-- Custom Music Player -->
+        <div class="player-wrapper">
+          <div class="player-main-card">
+            
+            <div class="player-top">
+              <!-- Spinning Vinyl / Album Art -->
+              <div class="player-cover-wrap">
+                <img id="player-song-cover" src="assets/images/song1-cover.jpg" alt="Song cover art" class="player-cover-img" />
+                <div class="cover-vinyl-ring"></div>
+              </div>
+
+              <!-- Track Metadata -->
+              <div class="player-meta-info">
+                <span class="player-now-playing">Now Playing</span>
+                <h3 id="player-song-title" class="player-title">Golden Hour Waltz</h3>
+                <h4 id="player-song-artist" class="player-artist">Acoustic Serenade</h4>
+                <p id="player-song-desc" class="player-description">The melody playing softly in the background when we first realized we were in love.</p>
+                
+                <!-- Equalizer Animation Bars -->
+                <div id="player-visualizer" class="player-visualizer">
+                  <span class="eq-bar bar-1"></span>
+                  <span class="eq-bar bar-2"></span>
+                  <span class="eq-bar bar-3"></span>
+                  <span class="eq-bar bar-4"></span>
+                  <span class="eq-bar bar-5"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scrubber / Progress -->
+            <div class="player-progress-container">
+              <div class="progress-bar-wrap">
+                <input type="range" id="player-progress" min="0" max="100" value="0" class="player-progress-input" aria-label="Audio timeline" />
+                <div id="player-progress-filled" class="player-progress-filled"></div>
+              </div>
+              <div class="player-time-display">
+                <span id="player-current-time">00:00</span>
+                <span id="player-duration">00:00</span>
+              </div>
+            </div>
+
+            <!-- Controls (Play, Prev, Next, Volume) -->
+            <div class="player-controls-row">
+              <button id="player-prev-btn" class="player-btn control-secondary" aria-label="Previous song">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+              </button>
+
+              <button id="player-play-btn" class="player-btn control-primary" aria-label="Play song">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </button>
+
+              <button id="player-next-btn" class="player-btn control-secondary" aria-label="Next song">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+              </button>
+
+              <!-- Volume Control -->
+              <div class="player-volume-group">
+                <button id="player-mute-btn" class="player-btn volume-btn" aria-label="Toggle mute" data-muted="false">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                </button>
+                <input type="range" id="player-volume" min="0" max="1" step="0.05" value="0.75" class="player-volume-slider" aria-label="Volume slider" />
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Playlist Queue -->
+          <div class="player-playlist-card">
+            <h4 class="playlist-heading">Playlist Collection</h4>
+            <div id="player-playlist-container" class="playlist-list">
+              <!-- Rendered via js/songs.js -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- SECTION 6: LETTER -->
+    <section id="letter" class="letter-section">
+      <div class="section-container">
+        <div class="section-heading-wrap">
+          <span class="section-kicker">From The Heart</span>
+          <h2 class="section-title">A LETTER FOR YOU</h2>
+          <p class="section-subtitle">Words written just for you, whenever you need a reminder of how cherished you are.</p>
+        </div>
+
+        <!-- Envelope Interactive Presentation -->
+        <div class="letter-stage">
+          <div id="letter-envelope-wrap" class="envelope-container">
+            
+            <div class="envelope-card">
+              <!-- Envelope Flap & Seal -->
+              <div class="envelope-top-flap"></div>
+              <div class="envelope-body-pocket">
+                <div class="envelope-emboss">
+                  <div class="envelope-seal-badge">
+                    <span class="seal-icon">💌</span>
+                  </div>
+                  <h3 class="envelope-label">A Letter For You</h3>
+                  <p class="envelope-prompt">Click to break the seal and read my heart.</p>
+                  
+                  <div class="envelope-action-wrap">
+                    <button id="btn-open-letter" class="btn-letter-open">
+                      <span>Open Letter</span>
+                    </button>
+                    <button id="btn-fold-letter" class="btn-letter-fold" style="display: none;">
+                      <span>Fold Letter</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Letter Paper Content (Easy to edit right here in HTML!) -->
+            <div id="letter-paper-content" class="letter-paper">
+              <div class="letter-paper-inner">
+                <div class="letter-date-stamp">A Love Note</div>
+                
+                <h3 class="letter-salutation">Dear You,</h3>
+
+                <!-- =====================================
+                     EDIT YOUR LETTER TEXT HERE
+                     ===================================== -->
+                <div class="letter-body-prose">
+                  <p>
+                    If there is one thing this journey has taught me, it is that home isn’t a place on a map—it is anywhere you are.
+                  </p>
+                  <p>
+                    Thank you for laughing at my silliest jokes, for listening when the world feels too loud, and for holding my hand through every small and grand moment. You make ordinary days feel extraordinary, and every quiet morning brighter simply by waking up beside me.
+                  </p>
+                  <p>
+                    I promise to always choose you, to celebrate your victories, to comfort you on hard days, and to never stop looking at you with the very same gratitude I felt the first day I knew I loved you.
+                  </p>
+                  <p>
+                    Our story is my favorite story in the entire world, and I cannot wait for every chapter yet to come.
+                  </p>
+                </div>
+
+                <div class="letter-signoff">
+                  <p class="signoff-with">With all my love,</p>
+                  <p class="signoff-name">Forever Yours</p>
+                </div>
+                <!-- =====================================
+                     END OF EDITABLE LETTER TEXT
+                     ===================================== -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================
+       FULLSCREEN LIGHTBOX MODAL (FOR PHOTOS)
+       ===================================== -->
+  <div id="gallery-lightbox" class="lightbox-modal" role="dialog" aria-hidden="true" aria-label="Photo Lightbox">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-dialog">
+      <button id="lightbox-close" class="lightbox-btn-close" aria-label="Close photo view">✕</button>
+      
+      <button id="lightbox-prev" class="lightbox-nav-btn prev-btn" aria-label="Previous photo">‹</button>
+      <button id="lightbox-next" class="lightbox-nav-btn next-btn" aria-label="Next photo">›</button>
+
+      <div class="lightbox-content">
+        <div class="lightbox-media-frame">
+          <img id="lightbox-img" src="" alt="Enlarged memory" class="lightbox-image" />
+        </div>
+        <div class="lightbox-info">
+          <div class="lightbox-header-line">
+            <h3 id="lightbox-title" class="lightbox-title"></h3>
+            <span id="lightbox-date" class="lightbox-date"></span>
+          </div>
+          <p id="lightbox-caption" class="lightbox-caption"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       RESPONSIVE VIDEO MODAL
+       ===================================== -->
+  <div id="video-modal" class="video-modal" role="dialog" aria-hidden="true" aria-label="Video Player Modal">
+    <div class="modal-backdrop"></div>
+    <div class="video-dialog">
+      <button id="video-modal-close" class="video-btn-close" aria-label="Close video player">✕</button>
+      <div class="video-player-wrap">
+        <video id="modal-video-element" controls preload="metadata" playsinline class="modal-video"></video>
+      </div>
+      <div class="video-modal-details">
+        <div class="video-modal-top">
+          <h3 id="video-modal-title" class="video-title"></h3>
+          <span id="video-modal-date" class="video-date"></span>
+        </div>
+        <p id="video-modal-desc" class="video-desc"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       ROMANTIC FOOTER
+       ===================================== -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-decor-line" aria-hidden="true"></div>
+      <p class="footer-quote">“Our little story is still being written.”</p>
+      <p class="footer-copyright">
+        © <span id="current-year">2026</span> OUR LITTLE STORY
+      </p>
+    </div>
+  </footer>
+
+  <!-- =====================================
+       SCRIPTS (Loaded sequentially)
+       ===================================== -->
+  <script src="js/gallery.js"></script>
+  <script src="js/anniversary.js"></script>
+  <script src="js/songs.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
