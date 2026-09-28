@@ -23,24 +23,10 @@
 // =====================================
 const songs = [
   {
-    title: "Golden Hour Waltz",
-    artist: "Acoustic Serenade",
-    cover: "assets/images/song1-cover.jpg",
-    audio: "assets/music/song1.mp3",
+    title: "Kita Lewati Berdua",
+    artist: "Overnight",
+    cover: "assets/images/cover_1.jpg",
+    audio: "assets/music/song.mp3",
     description: "The melody playing softly in the background when we first realized we were in love."
-  },
-  {
-    title: "Tides & Twilight",
-    artist: "Ocean Whispers",
-    cover: "assets/images/song2-cover.jpg",
-    audio: "assets/music/song2.mp3",
-    description: "Our sunset drive playlist staple that accompanied our first coastal trip."
-  },
-  {
-    title: "Starry Night Lullaby",
-    artist: "Midnight Echoes",
-    cover: "assets/images/song3-cover.jpg",
-    audio: "assets/music/song3.mp3",
-    description: "The calm acoustic guitar tune we play late at night while stargazing."
   }
 ];
