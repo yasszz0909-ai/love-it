@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initGallery();
   initSpecialDates();
+  initBirthdays();
   initMusicPlayer();
   initTimeline();
   initLetter();
@@ -447,6 +448,165 @@ function initSpecialDates() {
 
     container.appendChild(card);
   });
+}
+
+/**
+ * 4B. OUR SPECIAL BIRTHDAYS & LIVE COUNTDOWN
+ * I'am: 22 Januari (Aquarius)
+ * Via: 30 Oktober (Scorpio)
+ */
+function initBirthdays() {
+  const timerIam = document.getElementById("timer-iam");
+  const timerVia = document.getElementById("timer-via");
+  if (!timerIam || !timerVia) return;
+
+  const iamDays = document.getElementById("iam-days");
+  const iamHours = document.getElementById("iam-hours");
+  const iamMins = document.getElementById("iam-minutes");
+  const iamSecs = document.getElementById("iam-seconds");
+  const iamStatus = document.getElementById("iam-status");
+
+  const viaDays = document.getElementById("via-days");
+  const viaHours = document.getElementById("via-hours");
+  const viaMins = document.getElementById("via-minutes");
+  const viaSecs = document.getElementById("via-seconds");
+  const viaStatus = document.getElementById("via-status");
+
+  function getNextBirthday(month, day) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    let nextBday = new Date(currentYear, month, day, 0, 0, 0);
+
+    const isToday = (now.getMonth() === month && now.getDate() === day);
+
+    // If the birthday has already passed this year (and is not today)
+    if (now > nextBday && !isToday) {
+      nextBday = new Date(currentYear + 1, month, day, 0, 0, 0);
+    }
+
+    const diffMs = nextBday.getTime() - now.getTime();
+    return { diffMs, isToday, nextBday };
+  }
+
+  function update() {
+    // I'am: 22 Januari (month index 0, day 22)
+    const bdayIam = getNextBirthday(0, 22);
+    // Via: 30 Oktober (month index 9, day 30)
+    const bdayVia = getNextBirthday(9, 30);
+
+    renderCard(bdayIam, iamDays, iamHours, iamMins, iamSecs, iamStatus, "Pangeran I'am", "👑");
+    renderCard(bdayVia, viaDays, viaHours, viaMins, viaSecs, viaStatus, "Tuan Putri Via", "🌸");
+  }
+
+  function renderCard(data, elDays, elHours, elMins, elSecs, elStatus, personName, emoji) {
+    if (data.isToday) {
+      if (elDays) elDays.textContent = "00";
+      if (elHours) elHours.textContent = "00";
+      if (elMins) elMins.textContent = "00";
+      if (elSecs) elSecs.textContent = "00";
+      if (elStatus) {
+        elStatus.innerHTML = `🎉 <strong>HARI INI ULANG TAHUN!</strong> Selamat hari lahir ${personName}! 🎂💖`;
+        elStatus.classList.add("is-birthday-today");
+      }
+      return;
+    }
+
+    let remaining = Math.max(0, data.diffMs);
+    const totalSecs = Math.floor(remaining / 1000);
+    const days = Math.floor(totalSecs / 86400);
+    const hours = Math.floor((totalSecs % 86400) / 3600);
+    const minutes = Math.floor((totalSecs % 3600) / 60);
+    const seconds = totalSecs % 60;
+
+    const pad = (n) => (n < 10 ? "0" + n : n);
+
+    if (elDays) elDays.textContent = pad(days);
+    if (elHours) elHours.textContent = pad(hours);
+    if (elMins) elMins.textContent = pad(minutes);
+    if (elSecs) elSecs.textContent = pad(seconds);
+
+    if (elStatus) {
+      if (days === 0) {
+        elStatus.innerHTML = `⏳ <strong>Besok ulang tahun ${personName}!</strong> Menghitung jam dan menit... 🎁✨`;
+      } else {
+        elStatus.innerHTML = `✨ <strong>${days} hari lagi</strong> menuju hari istimewa ${personName} ${emoji}`;
+      }
+    }
+  }
+
+  update();
+  setInterval(update, 1000);
+
+  // Interactive buttons
+  const btnWishIam = document.getElementById("btn-wish-iam");
+  const btnWishVia = document.getElementById("btn-wish-via");
+
+  if (btnWishIam) {
+    btnWishIam.addEventListener("click", () => {
+      triggerHeartBurst(btnWishIam, ["⭐", "💙", "👑", "✨", "🎂"]);
+      showMainToast("Doa tulus untuk I'am (Yas): Semoga sehat selalu, berkah usianya, dan kita bahagia bersama selamanya! 🤲💙✨");
+    });
+  }
+
+  if (btnWishVia) {
+    btnWishVia.addEventListener("click", () => {
+      triggerHeartBurst(btnWishVia, ["🌸", "💖", "🌷", "✨", "🥰"]);
+      showMainToast("Peluk erat & cium hangat untuk Via: Terima kasih sudah hadir menjadi bidadari tercantik dan teristimewa di hidupku! 🌸💖");
+    });
+  }
+
+  // Floating burst effect
+  function triggerHeartBurst(targetEl, symbols) {
+    const rect = targetEl.getBoundingClientRect();
+    const burstCount = 18;
+
+    for (let i = 0; i < burstCount; i++) {
+      const p = document.createElement("div");
+      p.className = "floating-bday-particle";
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      
+      const startX = rect.left + rect.width / 2 + (Math.random() - 0.5) * 40;
+      const startY = rect.top + window.scrollY;
+      
+      p.style.left = `${startX}px`;
+      p.style.top = `${startY}px`;
+      p.style.fontSize = `${16 + Math.random() * 16}px`;
+
+      const angle = (Math.PI * 2 * i) / burstCount + (Math.random() - 0.5) * 0.5;
+      const velocity = 60 + Math.random() * 80;
+      const dx = Math.cos(angle) * velocity;
+      const dy = Math.sin(angle) * velocity - 70; // bias upward
+
+      document.body.appendChild(p);
+
+      p.animate([
+        { transform: "translate(0, 0) scale(0.5) rotate(0deg)", opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(1.3) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.6 },
+        { transform: `translate(${dx * 1.3}px, ${dy + 80}px) scale(0.8) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+      ], {
+        duration: 1200 + Math.random() * 600,
+        easing: "cubic-bezier(0.25, 1, 0.5, 1)"
+      }).onfinish = () => p.remove();
+    }
+  }
+
+  // Global toast on main page
+  function showMainToast(message) {
+    let toast = document.getElementById("main-site-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "main-site-toast";
+      toast.className = "main-site-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add("visible");
+    
+    if (window.mainToastTimer) clearTimeout(window.mainToastTimer);
+    window.mainToastTimer = setTimeout(() => {
+      toast.classList.remove("visible");
+    }, 4000);
+  }
 }
 
 /**

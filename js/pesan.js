@@ -144,18 +144,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Clear validation error on input
+  if (inputPesan) {
+    inputPesan.addEventListener("input", () => {
+      inputPesan.classList.remove("input-error");
+      const errorMsg = document.getElementById("pesan-error-msg");
+      if (errorMsg) errorMsg.style.display = "none";
+    });
+  }
+
   // Submit Form (Selesai)
   if (btnSelesai) {
     btnSelesai.addEventListener("click", () => {
-      const dari = (inputDari && inputDari.value.trim()) ? inputDari.value.trim() : "Viia";
-      const pesan = (inputPesan && inputPesan.value.trim()) ? inputPesan.value.trim() : "(Belum ada pesan)";
+      const pesan = (inputPesan && inputPesan.value) ? inputPesan.value.trim() : "";
+
+      // Validasi: Pesan tidak boleh kosong
+      if (!pesan) {
+        if (inputPesan) {
+          inputPesan.classList.add("input-error");
+          inputPesan.focus();
+        }
+        const errorMsg = document.getElementById("pesan-error-msg");
+        if (errorMsg) errorMsg.style.display = "block";
+        showToast("Tuliskan pesan isi hatimu terlebih dahulu yaa sayang 🥰");
+        return;
+      }
+
+      // Variable "untuk" berisi nama "I'am/Yas", tidak dijadikan inputan
+      const untuk = "I'am/Yas";
+      const dari = (inputDari && inputDari.value.trim()) ? inputDari.value.trim() : "Via";
       const singkat = (inputSingkat && inputSingkat.value.trim()) ? inputSingkat.value.trim() : "I Love You too❤️";
 
-      // Exact structure requested:
+      // Format yang akan di-copy:
+      // Untuk: I'am/Yas
+      // 
       // (pesan)
+      // 
       // (kata kata singkat)
+      // 
       // From (dari)
-      formattedResult = `${pesan}\n\n${singkat}\n\nFrom ${dari}`;
+      formattedResult = `Untuk: ${untuk}\n\n${pesan}\n\n${singkat}\n\nFrom ${dari}`;
 
       if (previewContent) {
         previewContent.textContent = formattedResult;
@@ -181,28 +209,23 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCopyMsg.addEventListener("click", () => {
       if (!formattedResult) return;
       copyToClipboard(formattedResult, () => {
-        showToast("Pesan berhasil disalin ke clipboard! 📋✨");
+        // Feedback visual pada tombol
+        btnCopyMsg.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>Pesan Berhasil Disalin! ✨</span>
+        `;
+        btnCopyMsg.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+        btnCopyMsg.style.pointerEvents = "none";
+
+        showToast("Pesan berhasil disalin! Mengalihkan ke halaman awal... 🥰");
+
+        // Otomatis kembali ke halaman awal setelah disalin
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1500);
       });
-    });
-  }
-
-  // Kirim to Discord Button
-  // Direct Discord profile URL for yasszz_09
-  const discordProfileUrl = "https://discord.com/users/1423515761351065661";
-
-  if (btnSendDiscord) {
-    btnSendDiscord.addEventListener("click", () => {
-      if (!formattedResult) return;
-
-      // 1. Copy formatted text to clipboard so it's ready to paste into chat
-      copyToClipboard(formattedResult, () => {
-        showToast("Pesan disalin! Membuka Discord yasszz_09... 💌");
-      });
-
-      // 2. Open Discord profile in new tab / application
-      setTimeout(() => {
-        window.open(discordProfileUrl, "_blank");
-      }, 400);
     });
   }
 

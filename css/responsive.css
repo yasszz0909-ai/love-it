@@ -219,6 +219,24 @@
     gap: 1.25rem;
   }
 
+  /* Birthdays Couple Grid Mobile */
+  .birthdays-couple-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .birthdays-love-connector {
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .connector-line {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.35), rgba(225, 29, 72, 0.35));
+  }
+
   /* Lightbox Navigation Buttons on Mobile */
   .lightbox-nav-btn {
     width: 40px;

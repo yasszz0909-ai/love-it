@@ -28,7 +28,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
-      <span><-Kembali</span>
+      <span>&lt;-Kembali</span>
     </a>
 
     <!-- Romantic Audio Player (Kita Lewati Berdua) -->
@@ -135,14 +135,15 @@ From I'am/Yass</div>
             <label class="form-label" for="input-dari">
               <span>Dari:</span>
             </label>
-            <input type="text" id="input-dari" class="form-input" value="Viia" placeholder="Nama pengirim..." />
+            <input type="text" id="input-dari" class="form-input" value="Via" placeholder="Nama pengirim..." />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="input-pesan">
               <span>Pesanmu:</span>
             </label>
-            <textarea id="input-pesan" class="form-textarea" placeholder="Tuliskan balasan isi hatimu untuk Yass di sini..."></textarea>
+            <textarea id="input-pesan" class="form-textarea" placeholder="Tuliskan balasan isi hatimu untuk I'am/Yas di sini..."></textarea>
+            <span class="form-error-msg" id="pesan-error-msg" style="display: none; color: #e11d48; font-size: 0.85rem; font-weight: 600; margin-top: 4px;">Tuliskan pesan isi hatimu terlebih dahulu yaa sayang 🥰</span>
           </div>
 
           <div class="form-group">
@@ -160,35 +161,38 @@ From I'am/Yass</div>
           </button>
         </div>
 
-        <!-- Result Preview & Actions (Copy & Kirim to Discord) -->
+        <!-- Result Preview & Actions (Copy Only + Instructions) -->
         <div class="reply-result-wrapper" id="reply-result-wrapper">
           <div class="preview-box">
-            <div class="preview-title">Format Pesan Siap Kirim:</div>
+            <div class="preview-title">Format Pesan Siap Dikirim:</div>
             <pre class="preview-content" id="preview-content"></pre>
+          </div>
+
+          <!-- Petunjuk / Instruksi Pengiriman Pesan -->
+          <div class="copy-instruction-card">
+            <div class="instruction-header">
+              <span class="instruction-icon">💡</span>
+              <span class="instruction-title">Instruksi:</span>
+            </div>
+            <ol class="instruction-steps">
+              <li>Tekan tombol Copy Pesan di bawah.</li>
+              <li>Kirim ke Aku🥰</li>
+            </ol>
           </div>
 
           <div class="action-buttons-row">
             <!-- Copy Button -->
             <button type="button" class="btn-copy-msg" id="btn-copy-msg">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
               </svg>
-              <span>Copy</span>
-            </button>
-
-            <!-- Kirim to Discord (yasszz_09) Button -->
-            <button type="button" class="btn-send-discord" id="btn-send-discord">
-              <!-- Discord Icon SVG -->
-              <svg width="20" height="20" viewBox="0 0 127.14 96.36" fill="currentColor">
-                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,45.91,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,45.91,96.12,53,91.08,65.69,84.69,65.69Z"/>
-              </svg>
-              <span>Kirim</span>
+              <span>Copy Pesan</span>
             </button>
           </div>
 
           <button type="button" class="btn-edit-again" id="btn-edit-again">
-            Edit pesan
+            Edit pesan kembali
           </button>
         </div>
       </div>
