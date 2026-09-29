@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------------------------------------------------------------------------
   // 1. Audio Controller (Kita Lewati Berdua - song.mp3)
   // --------------------------------------------------------------------------
-  let isPlayingAudio = true;
+  let isPlayingAudio = false;
 
   function toggleAudio() {
     if (!audioEl) return;
