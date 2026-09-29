@@ -964,8 +964,27 @@ function initSavedMessages() {
       .replace(/'/g, "&#039;");
   }
 
-  function renderList(list) {
+  function deduplicate(items) {
+    if (!Array.isArray(items)) return [];
+    const seen = new Set();
+    const result = [];
+    for (const item of items) {
+      if (!item) continue;
+      const key = (item.content || "").trim();
+      const idKey = item.firestoreId || item.id;
+      if (key && seen.has(key)) continue;
+      if (idKey && seen.has(idKey)) continue;
+      if (key) seen.add(key);
+      if (idKey) seen.add(idKey);
+      result.push(item);
+    }
+    return result;
+  }
+
+  function renderList(rawList) {
     if (!container) return;
+
+    const list = deduplicate(rawList);
 
     if (!Array.isArray(list) || list.length === 0) {
       if (countText) countText.textContent = "0 Surat Tersimpan";

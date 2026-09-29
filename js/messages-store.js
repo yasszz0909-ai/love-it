@@ -1,14 +1,14 @@
 /**
  * OUR LITTLE STORY - Love Messages Store
  * Dual-layer persistence: Firebase Firestore (Cloud) + localStorage (Offline/Instant cache)
- * Features dual-mode transport: Firebase Modular SDK with instant HTTPS REST fallback
+ * Guaranteed Idempotent Writes & Automatic Deduplication
  */
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
   collection, 
-  addDoc, 
+  setDoc,
   getDocs, 
   onSnapshot, 
   query, 
@@ -30,7 +30,7 @@ const firebaseConfig = {
 };
 
 const LOCAL_STORAGE_KEY = "our_little_story_saved_letters_v2";
-const FIRESTORE_REST_URL = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/${firebaseConfig.firestoreDatabaseId}/documents/messages?key=${firebaseConfig.apiKey}`;
+const FIRESTORE_REST_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/${firebaseConfig.firestoreDatabaseId}/documents/messages`;
 
 let db = null;
 let isFirebaseReady = false;
@@ -44,25 +44,41 @@ try {
 }
 
 // ----------------------------------------------------------------------------
-// Local Storage Helper
+// Deduplication & Local Storage Helpers
 // ----------------------------------------------------------------------------
+export function deduplicateMessages(messages) {
+  if (!Array.isArray(messages)) return [];
+  const seenIds = new Set();
+  const seenContents = new Set();
+  const unique = [];
+
+  for (const m of messages) {
+    if (!m) continue;
+    const idKey = m.firestoreId || m.id;
+    const contentKey = (m.content || "").trim();
+
+    // Skip duplicates by ID or identical content
+    if (idKey && seenIds.has(idKey)) continue;
+    if (contentKey && seenContents.has(contentKey)) continue;
+
+    if (idKey) seenIds.add(idKey);
+    if (contentKey) seenContents.add(contentKey);
+    unique.push(m);
+  }
+  return unique;
+}
+
 function getLocalMessages() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    // Filter out old deleted/test messages if present
-    const cleaned = parsed.filter(m => {
-      if (!m) return false;
-      if (m.id === "5pVTjjS5RZ4cNpq5AHmC" || m.firestoreId === "5pVTjjS5RZ4cNpq5AHmC") return false;
-      if (typeof m.content === "string" && m.content.includes("Selamat datang di arsip surat cinta")) return false;
-      return true;
-    });
-    if (cleaned.length !== parsed.length) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
+    const deduped = deduplicateMessages(parsed);
+    if (deduped.length !== parsed.length) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(deduped));
     }
-    return cleaned;
+    return deduped;
   } catch (e) {
     console.error("Error reading localStorage messages:", e);
     return [];
@@ -71,15 +87,16 @@ function getLocalMessages() {
 
 function saveLocalMessages(messages) {
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
-    window.dispatchEvent(new CustomEvent("love-messages-updated", { detail: messages }));
+    const cleaned = deduplicateMessages(messages);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
+    window.dispatchEvent(new CustomEvent("love-messages-updated", { detail: cleaned }));
   } catch (e) {
     console.error("Error writing localStorage messages:", e);
   }
 }
 
-// Helper: Save via direct standard HTTPS REST endpoint
-async function saveViaRest(payload) {
+// Helper: Save via REST endpoint with specific documentId (Idempotent)
+async function saveViaRestIdempotent(docId, payload) {
   const body = {
     fields: {
       sender: { stringValue: payload.sender },
@@ -91,30 +108,41 @@ async function saveViaRest(payload) {
     }
   };
 
-  const res = await fetch(FIRESTORE_REST_URL, {
+  // Try POST with explicit documentId
+  const urlWithId = `${FIRESTORE_REST_BASE}?documentId=${docId}&key=${firebaseConfig.apiKey}`;
+  const res = await fetch(urlWithId, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`REST Firestore error ${res.status}: ${errText}`);
+  if (res.ok) {
+    return docId;
   }
 
-  const data = await res.json();
-  // Name format: projects/.../databases/.../documents/messages/{docId}
-  const parts = (data.name || "").split("/");
-  return parts[parts.length - 1] || "rest-" + Date.now();
+  // If already exists (409 Conflict), update using PATCH
+  if (res.status === 409) {
+    const patchUrl = `${FIRESTORE_REST_BASE}/${docId}?key=${firebaseConfig.apiKey}`;
+    const patchRes = await fetch(patchUrl, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (patchRes.ok) return docId;
+  }
+
+  const errText = await res.text();
+  throw new Error(`REST error ${res.status}: ${errText}`);
 }
 
 // Helper: Query via REST endpoint
 async function queryViaRest() {
-  const res = await fetch(FIRESTORE_REST_URL);
+  const url = `${FIRESTORE_REST_BASE}?key=${firebaseConfig.apiKey}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`REST query error: ${res.status}`);
   const data = await res.json();
   const documents = data.documents || [];
-  return documents.map(d => {
+  const list = documents.map(d => {
     const parts = (d.name || "").split("/");
     const id = parts[parts.length - 1];
     const fields = d.fields || {};
@@ -129,6 +157,7 @@ async function queryViaRest() {
       createdAt: fields.createdAt?.stringValue || d.createTime || new Date().toISOString()
     };
   });
+  return deduplicateMessages(list);
 }
 
 // ----------------------------------------------------------------------------
@@ -141,7 +170,7 @@ export const LoveMessagesStore = {
 
   /**
    * Save a love message permanently to Firestore Cloud & localStorage
-   * Guaranteed to complete network persistence before resolving
+   * Guaranteed IDEMPOTENT: Uses a single generated document ID so duplicate writes are impossible
    */
   async saveMessage({ sender = "Via", recipient = "I'am/Yas", content, category = "Surat Cinta", singkat = "" }) {
     if (!content || !content.trim()) {
@@ -154,27 +183,30 @@ export const LoveMessagesStore = {
     const trimmedSingkat = (singkat && singkat.trim()) || "";
     const nowIso = new Date().toISOString();
 
-    const localId = "local-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7);
+    // Deterministic unique ID generated BEFORE any write attempt
+    // Both SDK and REST will write to this exact ID, ensuring zero duplication
+    const docId = "msg_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
 
     const messageData = {
-      id: localId,
+      id: docId,
+      firestoreId: docId,
       sender: trimmedSender,
       recipient: trimmedRecipient,
       content: trimmedContent,
       category: category,
       singkat: trimmedSingkat,
-      createdAt: nowIso
+      createdAt: nowIso,
+      savedToCloud: false
     };
 
-    // 1. Instantly save to local storage (0ms latency, safety first)
+    // 1. Instantly save to local storage (0ms latency, deduplicated)
     const currentList = getLocalMessages();
-    currentList.unshift(messageData);
-    saveLocalMessages(currentList);
+    // Remove any previous entry with exact same content to prevent local duplicates
+    const filteredList = currentList.filter(m => (m.content || "").trim() !== trimmedContent);
+    filteredList.unshift(messageData);
+    saveLocalMessages(filteredList);
 
     // 2. Persist to Firestore Cloud Database
-    let cloudDocId = null;
-    let cloudError = null;
-
     const firestorePayload = {
       sender: trimmedSender,
       recipient: trimmedRecipient,
@@ -184,49 +216,46 @@ export const LoveMessagesStore = {
       createdAt: nowIso
     };
 
-    // Attempt 1: Modular Firebase SDK with 3.5s timeout
+    let cloudSaved = false;
+
+    // Primary: Write with SDK using setDoc (Idempotent to docId)
     if (this.isCloudConnected()) {
       try {
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("SDK Timeout")), 3500)
+          setTimeout(() => reject(new Error("SDK Timeout")), 3000)
         );
-        const writePromise = addDoc(collection(db, "messages"), firestorePayload);
-        const docRef = await Promise.race([writePromise, timeoutPromise]);
-        cloudDocId = docRef.id;
-        console.log("[LoveMessagesStore] Saved via Firebase SDK:", cloudDocId);
+        const writePromise = setDoc(doc(db, "messages", docId), firestorePayload);
+        await Promise.race([writePromise, timeoutPromise]);
+        cloudSaved = true;
+        console.log("[LoveMessagesStore] Saved via Firebase SDK:", docId);
       } catch (err) {
-        console.warn("[LoveMessagesStore] SDK write failed or timed out, trying REST fallback:", err);
-        cloudError = err;
+        console.warn("[LoveMessagesStore] SDK setDoc timed out/failed, trying REST fallback:", err);
       }
     }
 
-    // Attempt 2: Direct HTTPS REST (works reliably across all environments & iframes)
-    if (!cloudDocId) {
+    // Secondary: Direct HTTPS REST (Idempotent to same docId)
+    if (!cloudSaved) {
       try {
-        cloudDocId = await saveViaRest(firestorePayload);
-        console.log("[LoveMessagesStore] Saved via direct HTTPS REST:", cloudDocId);
+        await saveViaRestIdempotent(docId, firestorePayload);
+        cloudSaved = true;
+        console.log("[LoveMessagesStore] Saved via HTTPS REST:", docId);
       } catch (restErr) {
-        console.error("[LoveMessagesStore] Both SDK and REST writes failed:", restErr);
-        cloudError = restErr;
+        console.error("[LoveMessagesStore] REST fallback error:", restErr);
       }
     }
 
-    // If cloud write succeeded, update the local item with the permanent Cloud ID
-    if (cloudDocId) {
-      messageData.id = cloudDocId;
-      messageData.firestoreId = cloudDocId;
-      messageData.savedToCloud = true;
-      const updatedList = getLocalMessages().map(m => m.id === localId ? messageData : m);
-      saveLocalMessages(updatedList);
-      return { success: true, firestoreId: cloudDocId, data: messageData };
-    }
+    messageData.savedToCloud = cloudSaved;
+    saveLocalMessages(filteredList);
 
-    // Still safe in local cache even if offline
-    return { success: false, isLocalOnly: true, error: cloudError?.message, data: messageData };
+    return { 
+      success: cloudSaved, 
+      firestoreId: docId, 
+      data: messageData 
+    };
   },
 
   /**
-   * Fetch all messages (Firestore cloud prioritized, with local fallback)
+   * Fetch all messages (Firestore cloud prioritized, with deduplication)
    */
   async getAllMessages() {
     const localList = getLocalMessages();
@@ -251,9 +280,7 @@ export const LoveMessagesStore = {
           });
         });
 
-        // Merge any unsaved local-only messages
-        const unsyncedLocals = localList.filter(l => l.id && l.id.startsWith("local-") && !cloudList.some(c => c.content === l.content));
-        const merged = [...unsyncedLocals, ...cloudList];
+        const merged = deduplicateMessages([...cloudList, ...localList]);
         saveLocalMessages(merged);
         return merged;
       } catch (err) {
@@ -265,8 +292,7 @@ export const LoveMessagesStore = {
     try {
       const restList = await queryViaRest();
       restList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const unsyncedLocals = localList.filter(l => l.id && l.id.startsWith("local-") && !restList.some(c => c.content === l.content));
-      const merged = [...unsyncedLocals, ...restList];
+      const merged = deduplicateMessages([...restList, ...localList]);
       saveLocalMessages(merged);
       return merged;
     } catch (e) {
@@ -276,7 +302,7 @@ export const LoveMessagesStore = {
   },
 
   /**
-   * Realtime subscription for live updates across devices
+   * Realtime subscription with automatic deduplication
    */
   subscribe(callback) {
     // Immediately emit current local messages for instantaneous UI render
@@ -284,7 +310,7 @@ export const LoveMessagesStore = {
 
     // Listen for cross-tab or local updates
     const onLocalUpdate = (e) => {
-      callback(e.detail || getLocalMessages());
+      callback(deduplicateMessages(e.detail || getLocalMessages()));
     };
     window.addEventListener("love-messages-updated", onLocalUpdate);
 
@@ -293,7 +319,9 @@ export const LoveMessagesStore = {
       const interval = setInterval(async () => {
         try {
           const list = await queryViaRest();
-          callback(list);
+          const localList = getLocalMessages();
+          const merged = deduplicateMessages([...list, ...localList]);
+          callback(merged);
         } catch (e) {}
       }, 15000);
 
@@ -321,10 +349,8 @@ export const LoveMessagesStore = {
           });
         });
 
-        // Merge any pending local items
         const currentLocals = getLocalMessages();
-        const pending = currentLocals.filter(l => l.id && l.id.startsWith("local-") && !cloudList.some(c => c.content === l.content));
-        const merged = [...pending, ...cloudList];
+        const merged = deduplicateMessages([...cloudList, ...currentLocals]);
 
         saveLocalMessages(merged);
         callback(merged);
@@ -352,7 +378,7 @@ export const LoveMessagesStore = {
     saveLocalMessages(updated);
 
     if (this.isCloudConnected() && itemToDelete) {
-      const cloudDocId = itemToDelete.firestoreId || (itemToDelete.id && !itemToDelete.id.startsWith("local-") ? itemToDelete.id : null);
+      const cloudDocId = itemToDelete.firestoreId || itemToDelete.id;
       if (cloudDocId) {
         try {
           await deleteDoc(doc(db, "messages", cloudDocId));
@@ -369,4 +395,5 @@ export const LoveMessagesStore = {
 // Expose globally for vanilla scripts
 if (typeof window !== "undefined") {
   window.LoveMessagesStore = LoveMessagesStore;
+  window.deduplicateMessages = deduplicateMessages;
 }
