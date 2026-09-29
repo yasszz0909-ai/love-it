@@ -54,14 +54,25 @@ try {
 }
 
 // ----------------------------------------------------------------------------
-// Local Storage Helper
+// Local Storage Helper with automatic cleanup of deleted/test docs
 // ----------------------------------------------------------------------------
 function getLocalMessages() {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Filter out deleted/test message if present
+    const cleaned = parsed.filter(m => {
+      if (!m) return false;
+      if (m.id === "5pVTjjS5RZ4cNpq5AHmC" || m.firestoreId === "5pVTjjS5RZ4cNpq5AHmC") return false;
+      if (typeof m.content === "string" && m.content.includes("Selamat datang di arsip surat cinta")) return false;
+      return true;
+    });
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     console.error("Error reading localStorage messages:", e);
     return [];
@@ -165,21 +176,8 @@ export const LoveMessagesStore = {
         });
       });
 
-      // Merge cloud list with any pending local messages
-      const mergedMap = new Map();
-      cloudList.forEach(item => mergedMap.set(item.id, item));
-      localList.forEach(item => {
-        if (!item.firestoreId || !mergedMap.has(item.firestoreId)) {
-          mergedMap.set(item.id, item);
-        }
-      });
-
-      const result = Array.from(mergedMap.values()).sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      saveLocalMessages(result);
-      return result;
+      saveLocalMessages(cloudList);
+      return cloudList;
     } catch (err) {
       console.warn("[LoveMessagesStore] Failed to query Firestore, using local:", err);
       return localList;
@@ -221,22 +219,10 @@ export const LoveMessagesStore = {
           });
         });
 
-        // Merge with local-only items
-        const localList = getLocalMessages();
-        const mergedMap = new Map();
-        cloudList.forEach(item => mergedMap.set(item.id, item));
-        localList.forEach(item => {
-          if (!item.firestoreId || !mergedMap.has(item.firestoreId)) {
-            mergedMap.set(item.id, item);
-          }
-        });
-
-        const merged = Array.from(mergedMap.values()).sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        saveLocalMessages(merged);
-        callback(merged);
+        // Firestore is the authoritative source of truth.
+        // Directly sync local cache with cloud list:
+        saveLocalMessages(cloudList);
+        callback(cloudList);
       }, (err) => {
         console.warn("[LoveMessagesStore] Firestore realtime error, using local:", err);
       });

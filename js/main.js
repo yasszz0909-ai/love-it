@@ -1046,12 +1046,21 @@ function initSavedMessages() {
     });
   }
 
-  // Initial immediate load from local storage
+  // Initial immediate load from local storage (with automatic cleanup of deleted/test messages)
   try {
     const rawLocal = localStorage.getItem("our_little_story_saved_letters_v2");
     if (rawLocal) {
-      const parsed = JSON.parse(rawLocal);
-      renderList(parsed);
+      let parsed = JSON.parse(rawLocal);
+      if (Array.isArray(parsed)) {
+        parsed = parsed.filter(m => {
+          if (!m) return false;
+          if (m.id === "5pVTjjS5RZ4cNpq5AHmC" || m.firestoreId === "5pVTjjS5RZ4cNpq5AHmC") return false;
+          if (typeof m.content === "string" && m.content.includes("Selamat datang di arsip surat cinta")) return false;
+          return true;
+        });
+        localStorage.setItem("our_little_story_saved_letters_v2", JSON.stringify(parsed));
+        renderList(parsed);
+      }
     }
   } catch (e) {}
 
