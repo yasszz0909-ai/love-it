@@ -1017,10 +1017,6 @@ function initSavedMessages() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span>Salin Pesan</span>
           </button>
-          <button type="button" class="btn-card-delete" data-id="${msg.id}" title="Hapus pesan ini">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            <span>Hapus</span>
-          </button>
         </div>
       `;
 
@@ -1043,29 +1039,6 @@ function initSavedMessages() {
           }).catch(() => {
             showMainToast("Gagal menyalin pesan.");
           });
-        });
-      }
-
-      // Delete action
-      const btnDel = card.querySelector(".btn-card-delete");
-      if (btnDel) {
-        btnDel.addEventListener("click", () => {
-          if (confirm("Apakah kamu yakin ingin menghapus surat cinta ini? 🥺")) {
-            if (window.LoveMessagesStore && typeof window.LoveMessagesStore.deleteMessage === "function") {
-              window.LoveMessagesStore.deleteMessage(msg.id).then(() => {
-                showMainToast("Surat cinta telah dihapus.");
-              });
-            } else {
-              try {
-                const key = "our_little_story_saved_letters_v2";
-                const current = JSON.parse(localStorage.getItem(key) || "[]");
-                const filtered = current.filter(m => m.id !== msg.id);
-                localStorage.setItem(key, JSON.stringify(filtered));
-                renderList(filtered);
-                showMainToast("Surat cinta telah dihapus.");
-              } catch (e) {}
-            }
-          }
         });
       }
 

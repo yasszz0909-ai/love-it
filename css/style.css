@@ -2587,44 +2587,30 @@ a {
 .saved-letter-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
   border-top: 1px solid rgba(241, 245, 249, 0.9);
-  gap: 0.5rem;
-}
-
-.btn-card-copy,
-.btn-card-delete {
-  background: transparent;
-  border: none;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  cursor: pointer;
-  padding: 0.4rem 0.75rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
 }
 
 .btn-card-copy {
-  color: #0284c7;
   background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  color: #0284c7;
+  font-size: 0.825rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
 }
 
 .btn-card-copy:hover {
   background: rgba(2, 132, 199, 0.16);
-}
-
-.btn-card-delete {
-  color: #94a3b8;
-}
-
-.btn-card-delete:hover {
-  color: #e11d48;
-  background: rgba(225, 29, 72, 0.08);
+  transform: translateY(-1px);
 }
 
 .saved-letters-empty {

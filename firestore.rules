@@ -11,8 +11,8 @@ service cloud.firestore {
     match /messages/{messageId} {
       allow read: if true;
       allow create: if isValidMessage(request.resource.data);
-      allow update: if isValidMessage(request.resource.data);
-      allow delete: if true;
+      allow update: if false;
+      allow delete: if false; // Hanya pemilik yang dapat menghapus dokumen langsung lewat Firebase Console
     }
 
     match /test/connection {
