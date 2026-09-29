@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Kirim to Discord Button
   // Direct Discord profile URL for yasszz_09
-  const discordProfileUrl = "https://discord.com/users/yasszz_09";
+  const discordProfileUrl = "https://discord.com/users/1423515761351065661";
 
   if (btnSendDiscord) {
     btnSendDiscord.addEventListener("click", () => {
