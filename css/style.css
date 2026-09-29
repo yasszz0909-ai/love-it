@@ -2381,3 +2381,279 @@ a {
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
+
+/* --------------------------------------------------------------------------
+   10B. Saved Letters & Love Notes Collection (Permanently Stored)
+   -------------------------------------------------------------------------- */
+.saved-letters-wrapper {
+  margin-top: 4.5rem;
+  padding-top: 3.5rem;
+  border-top: 1.5px dashed rgba(225, 29, 72, 0.2);
+}
+
+.saved-letters-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.saved-letters-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.saved-letters-kicker {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-red);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.saved-letters-title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.saved-letters-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.saved-letters-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.badge-letters-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(225, 29, 72, 0.08);
+  color: var(--color-red);
+  font-size: 0.825rem;
+  font-weight: 700;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(225, 29, 72, 0.2);
+}
+
+.btn-write-letter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.55rem 1.25rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-write-letter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+}
+
+.saved-letters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.75rem;
+}
+
+.saved-letter-card {
+  background: linear-gradient(145deg, #ffffff 0%, #fffdfa 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  padding: 1.6rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.saved-letter-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #38bdf8, #f43f5e, #fb7185);
+}
+
+.saved-letter-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.08);
+}
+
+.saved-letter-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 0.75rem;
+}
+
+.saved-letter-sender-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.saved-letter-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.15);
+}
+
+.saved-letter-avatar.avatar-iam {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0284c7;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+}
+
+.saved-letter-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.saved-letter-from {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-main);
+}
+
+.saved-letter-date {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+}
+
+.saved-letter-cloud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+}
+
+.saved-letter-content {
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: #334155;
+  background: rgba(248, 250, 252, 0.75);
+  border: 1px solid rgba(241, 245, 249, 0.9);
+  border-radius: 14px;
+  padding: 1.15rem;
+  margin-bottom: 1.25rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.saved-letter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(241, 245, 249, 0.9);
+  gap: 0.5rem;
+}
+
+.btn-card-copy,
+.btn-card-delete {
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-card-copy {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+}
+
+.btn-card-copy:hover {
+  background: rgba(2, 132, 199, 0.16);
+}
+
+.btn-card-delete {
+  color: #94a3b8;
+}
+
+.btn-card-delete:hover {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.08);
+}
+
+.saved-letters-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #cbd5e1;
+  border-radius: 20px;
+  grid-column: 1 / -1;
+}
+
+.saved-letters-empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.saved-letters-empty-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 0.5rem;
+}
+
+.saved-letters-empty-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  max-width: 440px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}

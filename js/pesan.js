@@ -144,16 +144,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Clear validation error on input
+  // Draft auto-saving & restoring
+  const DRAFT_KEY = "our_little_story_pesan_draft";
+  try {
+    const savedDraft = localStorage.getItem(DRAFT_KEY);
+    if (savedDraft && inputPesan && !inputPesan.value) {
+      inputPesan.value = savedDraft;
+    }
+  } catch (e) {}
+
+  // Clear validation error and save draft on input
   if (inputPesan) {
     inputPesan.addEventListener("input", () => {
+      try {
+        localStorage.setItem(DRAFT_KEY, inputPesan.value);
+      } catch (e) {}
       inputPesan.classList.remove("input-error");
       const errorMsg = document.getElementById("pesan-error-msg");
       if (errorMsg) errorMsg.style.display = "none";
     });
   }
 
-  // Submit Form (Selesai)
+  // Submit Form (Selesai) -> Simpan Permanen ke Website & Cloud
   if (btnSelesai) {
     btnSelesai.addEventListener("click", () => {
       const pesan = (inputPesan && inputPesan.value) ? inputPesan.value.trim() : "";
@@ -175,24 +187,53 @@ document.addEventListener("DOMContentLoaded", () => {
       const dari = (inputDari && inputDari.value.trim()) ? inputDari.value.trim() : "Via";
       const singkat = (inputSingkat && inputSingkat.value.trim()) ? inputSingkat.value.trim() : "I Love You too❤️";
 
-      // Format yang akan di-copy:
-      // Untuk: I'am/Yas
-      // 
-      // (pesan)
-      // 
-      // (kata kata singkat)
-      // 
-      // From (dari)
+      // Format yang akan di-copy & disimpan:
       formattedResult = `Untuk: ${untuk}\n\n${pesan}\n\n${singkat}\n\nFrom ${dari}`;
 
       if (previewContent) {
         previewContent.textContent = formattedResult;
       }
 
+      // Hapus draft input karena pesan sudah resmi selesai
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch (e) {}
+
+      // SIMPAN PERMANEN KE WEBSITE & CLOUD FIRESTORE
+      const savePayload = {
+        sender: dari,
+        recipient: untuk,
+        content: formattedResult,
+        category: "Balasan Surat Cinta",
+        singkat: singkat
+      };
+
+      if (window.LoveMessagesStore && typeof window.LoveMessagesStore.saveMessage === "function") {
+        window.LoveMessagesStore.saveMessage(savePayload).catch((err) => {
+          console.warn("[Pesan] Simpan ke cloud tertunda, tetap aman di cache lokal:", err);
+        });
+      } else {
+        // Fallback instan langsung ke localStorage jika modul belum siap
+        try {
+          const key = "our_little_story_saved_letters_v2";
+          const existing = JSON.parse(localStorage.getItem(key) || "[]");
+          existing.unshift({
+            id: "local-" + Date.now(),
+            sender: dari,
+            recipient: untuk,
+            content: formattedResult,
+            category: "Balasan Surat Cinta",
+            singkat: singkat,
+            createdAt: new Date().toISOString()
+          });
+          localStorage.setItem(key, JSON.stringify(existing));
+        } catch (e) {}
+      }
+
       if (replyFormWrapper) replyFormWrapper.classList.remove("active");
       if (replyResultWrapper) replyResultWrapper.classList.add("active");
 
-      showToast("Pesan balasanmu sudah siap! ✨");
+      showToast("Pesan tersimpan otomatis ke website & cloud! 💖");
     });
   }
 

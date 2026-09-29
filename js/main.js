@@ -38,6 +38,7 @@ function startApplication() {
   safeRun("Music Player", initMusicPlayer);
   safeRun("Timeline", initTimeline);
   safeRun("Letter", initLetter);
+  safeRun("Saved Messages", initSavedMessages);
   safeRun("Scroll Animations", initScrollAnimations);
   safeRun("Footer Year", initFooterYear);
 }
@@ -926,6 +927,174 @@ function initLetter() {
       envelopeWrap.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   }
+}
+
+/**
+ * 7B. SAVED LOVE LETTERS & MESSAGES (PERMANENT STORAGE)
+ */
+function initSavedMessages() {
+  const container = document.getElementById("saved-letters-container");
+  const countText = document.getElementById("letters-count-text");
+
+  if (!container) return;
+
+  function formatDate(isoString) {
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "Waktu Spesial";
+      return d.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }) + " WIB";
+    } catch (e) {
+      return "Waktu Spesial";
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderList(list) {
+    if (!container) return;
+
+    if (!Array.isArray(list) || list.length === 0) {
+      if (countText) countText.textContent = "0 Surat Tersimpan";
+      container.innerHTML = `
+        <div class="saved-letters-empty">
+          <span class="saved-letters-empty-icon">📮</span>
+          <h4 class="saved-letters-empty-title">Belum Ada Pesan Tersimpan</h4>
+          <p class="saved-letters-empty-desc">Saat kamu menulis dan menekan Selesai di halaman surat cinta, pesanmu otomatis tersimpan aman di sini dan tidak akan pernah hilang.</p>
+          <a href="pesan.html" class="btn-write-letter">Tulis Pesan Cinta Pertama 💌</a>
+        </div>
+      `;
+      return;
+    }
+
+    if (countText) {
+      countText.textContent = `${list.length} Surat Tersimpan`;
+    }
+
+    container.innerHTML = "";
+
+    list.forEach((msg) => {
+      const card = document.createElement("div");
+      card.className = "saved-letter-card";
+
+      const senderName = msg.sender || "Via";
+      const isIam = senderName.toLowerCase().includes("i'am") || senderName.toLowerCase().includes("yas");
+      const avatarEmoji = isIam ? "👑" : "🌸";
+      const avatarClass = isIam ? "saved-letter-avatar avatar-iam" : "saved-letter-avatar";
+
+      card.innerHTML = `
+        <div class="saved-letter-header">
+          <div class="saved-letter-sender-wrap">
+            <div class="${avatarClass}">${avatarEmoji}</div>
+            <div class="saved-letter-meta">
+              <span class="saved-letter-from">Dari: ${escapeHtml(senderName)}</span>
+              <span class="saved-letter-date">${formatDate(msg.createdAt)}</span>
+            </div>
+          </div>
+          <span class="saved-letter-cloud-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+            Tersimpan
+          </span>
+        </div>
+
+        <div class="saved-letter-content">${escapeHtml(msg.content)}</div>
+
+        <div class="saved-letter-footer">
+          <button type="button" class="btn-card-copy" data-id="${msg.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Salin Pesan</span>
+          </button>
+          <button type="button" class="btn-card-delete" data-id="${msg.id}" title="Hapus pesan ini">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Hapus</span>
+          </button>
+        </div>
+      `;
+
+      // Copy action
+      const btnCopy = card.querySelector(".btn-card-copy");
+      if (btnCopy) {
+        btnCopy.addEventListener("click", () => {
+          navigator.clipboard.writeText(msg.content).then(() => {
+            btnCopy.innerHTML = `
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span style="color: #10b981;">Tersalin!</span>
+            `;
+            showMainToast("Pesan cinta berhasil disalin ke clipboard! ✨💖");
+            setTimeout(() => {
+              btnCopy.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Salin Pesan</span>
+              `;
+            }, 2500);
+          }).catch(() => {
+            showMainToast("Gagal menyalin pesan.");
+          });
+        });
+      }
+
+      // Delete action
+      const btnDel = card.querySelector(".btn-card-delete");
+      if (btnDel) {
+        btnDel.addEventListener("click", () => {
+          if (confirm("Apakah kamu yakin ingin menghapus surat cinta ini? 🥺")) {
+            if (window.LoveMessagesStore && typeof window.LoveMessagesStore.deleteMessage === "function") {
+              window.LoveMessagesStore.deleteMessage(msg.id).then(() => {
+                showMainToast("Surat cinta telah dihapus.");
+              });
+            } else {
+              try {
+                const key = "our_little_story_saved_letters_v2";
+                const current = JSON.parse(localStorage.getItem(key) || "[]");
+                const filtered = current.filter(m => m.id !== msg.id);
+                localStorage.setItem(key, JSON.stringify(filtered));
+                renderList(filtered);
+                showMainToast("Surat cinta telah dihapus.");
+              } catch (e) {}
+            }
+          }
+        });
+      }
+
+      container.appendChild(card);
+    });
+  }
+
+  // Initial immediate load from local storage
+  try {
+    const rawLocal = localStorage.getItem("our_little_story_saved_letters_v2");
+    if (rawLocal) {
+      const parsed = JSON.parse(rawLocal);
+      renderList(parsed);
+    }
+  } catch (e) {}
+
+  // Subscribe to real-time store updates
+  function connectStore() {
+    if (window.LoveMessagesStore && typeof window.LoveMessagesStore.subscribe === "function") {
+      window.LoveMessagesStore.subscribe(renderList);
+    } else {
+      setTimeout(connectStore, 200);
+    }
+  }
+  connectStore();
+
+  window.addEventListener("love-messages-updated", (e) => {
+    if (e.detail) renderList(e.detail);
+  });
 }
 
 /**

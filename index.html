@@ -610,6 +610,38 @@
             </div>
 
           </div>
+        <!-- SAVED LETTERS & LOVE MESSAGES (PERMANENTLY STORED) -->
+        <div class="saved-letters-wrapper" id="saved-messages">
+          <div class="saved-letters-header">
+            <div class="saved-letters-title-wrap">
+              <span class="saved-letters-kicker">
+                <span>💌</span>
+                <span>Arsip Surat & Pesan Kita</span>
+              </span>
+              <h3 class="saved-letters-title">Surat Cinta yang Tersimpan</h3>
+              <p class="saved-letters-subtitle">Semua pesan dan balasan cinta yang telah dibuat tersimpan permanen di website ini.</p>
+            </div>
+            <div class="saved-letters-actions">
+              <span class="badge-letters-count" id="badge-letters-count">
+                <span>📝</span>
+                <span id="letters-count-text">Memuat pesan...</span>
+              </span>
+              <a href="pesan.html" class="btn-write-letter">
+                <span>+ Tulis Pesan Baru</span>
+                <span>✨</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Letters Grid -->
+          <div class="saved-letters-grid" id="saved-letters-container">
+            <div class="saved-letters-empty">
+              <span class="saved-letters-empty-icon">📮</span>
+              <h4 class="saved-letters-empty-title">Belum Ada Pesan Tersimpan</h4>
+              <p class="saved-letters-empty-desc">Saat kamu menulis dan menekan Selesai di halaman surat cinta, pesanmu otomatis tersimpan aman di sini dan tidak akan pernah hilang.</p>
+              <a href="pesan.html" class="btn-write-letter">Tulis Pesan Cinta Pertama 💌</a>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -698,7 +730,8 @@
   <script src="js/anniversary.js?v=2.2"></script>
   <script src="js/songs.js?v=2.2"></script>
   <script src="js/timeline.js?v=2.2"></script>
-  <script src="js/main.js?v=2.2"></script>
+  <script type="module" src="js/messages-store.js"></script>
+  <script src="js/main.js?v=2.3"></script>
   <script>
     // Global fallback triggers
     if (typeof window.runLiveCountdown === 'function') {
