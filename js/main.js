@@ -21,18 +21,33 @@ const partnerNames = {
 // =====================================
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  initRelationshipCounter();
-  initNavigation();
-  initGallery();
-  initSpecialDates();
-  initBirthdays();
-  initMusicPlayer();
-  initTimeline();
-  initLetter();
-  initScrollAnimations();
-  initFooterYear();
-});
+function safeRun(moduleName, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[OurLittleStory] Error in ${moduleName}:`, err);
+  }
+}
+
+function startApplication() {
+  safeRun("Relationship Counter", initRelationshipCounter);
+  safeRun("Navigation", initNavigation);
+  safeRun("Gallery", initGallery);
+  safeRun("Special Dates", initSpecialDates);
+  safeRun("Birthdays", initBirthdays);
+  safeRun("Music Player", initMusicPlayer);
+  safeRun("Timeline", initTimeline);
+  safeRun("Letter", initLetter);
+  safeRun("Scroll Animations", initScrollAnimations);
+  safeRun("Footer Year", initFooterYear);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startApplication);
+} else {
+  // DOM is already parsed (interactive or complete), run immediately
+  startApplication();
+}
 
 /**
  * 1. LIVE RELATIONSHIP COUNTER
@@ -456,49 +471,34 @@ function initSpecialDates() {
  * Via: 30 Oktober (Scorpio)
  */
 function initBirthdays() {
-  const timerIam = document.getElementById("timer-iam");
-  const timerVia = document.getElementById("timer-via");
-  if (!timerIam || !timerVia) return;
-
-  const iamDays = document.getElementById("iam-days");
-  const iamHours = document.getElementById("iam-hours");
-  const iamMins = document.getElementById("iam-minutes");
-  const iamSecs = document.getElementById("iam-seconds");
-  const iamStatus = document.getElementById("iam-status");
-
-  const viaDays = document.getElementById("via-days");
-  const viaHours = document.getElementById("via-hours");
-  const viaMins = document.getElementById("via-minutes");
-  const viaSecs = document.getElementById("via-seconds");
-  const viaStatus = document.getElementById("via-status");
-
-  function getNextBirthday(month, day) {
+  function getNextBirthday(targetMonth, targetDay) {
     const now = new Date();
     const currentYear = now.getFullYear();
-    let nextBday = new Date(currentYear, month, day, 0, 0, 0);
 
-    const isToday = (now.getMonth() === month && now.getDate() === day);
+    // Check if today matches the birthday date
+    const isToday = (now.getMonth() === targetMonth && now.getDate() === targetDay);
 
-    // If the birthday has already passed this year (and is not today)
-    if (now > nextBday && !isToday) {
-      nextBday = new Date(currentYear + 1, month, day, 0, 0, 0);
+    // Target midnight of the birthday date
+    let targetDate = new Date(currentYear, targetMonth, targetDay, 0, 0, 0, 0);
+
+    // If target date is in the past and today is not the birthday, set to next year
+    if (now.getTime() > targetDate.getTime() && !isToday) {
+      targetDate = new Date(currentYear + 1, targetMonth, targetDay, 0, 0, 0, 0);
     }
 
-    const diffMs = nextBday.getTime() - now.getTime();
-    return { diffMs, isToday, nextBday };
+    const diffMs = targetDate.getTime() - now.getTime();
+    return { diffMs, isToday, targetDate };
   }
 
-  function update() {
-    // I'am: 22 Januari (month index 0, day 22)
-    const bdayIam = getNextBirthday(0, 22);
-    // Via: 30 Oktober (month index 9, day 30)
-    const bdayVia = getNextBirthday(9, 30);
+  function renderPerson(prefix, targetMonth, targetDay, personName, emoji) {
+    const elDays = document.getElementById(`${prefix}-days`);
+    const elHours = document.getElementById(`${prefix}-hours`);
+    const elMins = document.getElementById(`${prefix}-minutes`);
+    const elSecs = document.getElementById(`${prefix}-seconds`);
+    const elStatus = document.getElementById(`${prefix}-status`);
 
-    renderCard(bdayIam, iamDays, iamHours, iamMins, iamSecs, iamStatus, "Pangeran I'am", "👑");
-    renderCard(bdayVia, viaDays, viaHours, viaMins, viaSecs, viaStatus, "Tuan Putri Via", "🌸");
-  }
+    const data = getNextBirthday(targetMonth, targetDay);
 
-  function renderCard(data, elDays, elHours, elMins, elSecs, elStatus, personName, emoji) {
     if (data.isToday) {
       if (elDays) elDays.textContent = "00";
       if (elHours) elHours.textContent = "00";
@@ -511,14 +511,14 @@ function initBirthdays() {
       return;
     }
 
-    let remaining = Math.max(0, data.diffMs);
+    const remaining = Math.max(0, data.diffMs);
     const totalSecs = Math.floor(remaining / 1000);
     const days = Math.floor(totalSecs / 86400);
     const hours = Math.floor((totalSecs % 86400) / 3600);
     const minutes = Math.floor((totalSecs % 3600) / 60);
     const seconds = totalSecs % 60;
 
-    const pad = (n) => (n < 10 ? "0" + n : n);
+    const pad = (n) => String(Math.max(0, n)).padStart(2, "0");
 
     if (elDays) elDays.textContent = pad(days);
     if (elHours) elHours.textContent = pad(hours);
@@ -526,16 +526,31 @@ function initBirthdays() {
     if (elSecs) elSecs.textContent = pad(seconds);
 
     if (elStatus) {
+      elStatus.classList.remove("is-birthday-today");
       if (days === 0) {
-        elStatus.innerHTML = `⏳ <strong>Besok ulang tahun ${personName}!</strong> Menghitung jam dan menit... 🎁✨`;
+        elStatus.innerHTML = `⏳ <strong>Kurang dari 24 jam lagi!</strong> Menghitung jam dan menit menuju ultah ${personName}... 🎁✨`;
       } else {
         elStatus.innerHTML = `✨ <strong>${days} hari lagi</strong> menuju hari istimewa ${personName} ${emoji}`;
       }
     }
   }
 
+  function update() {
+    var cfg = window.coupleBirthdays || {
+      iam: { month: 0, day: 22, name: "Pangeran I'am", emoji: "👑" },
+      via: { month: 9, day: 30, name: "Tuan Putri Via", emoji: "🌸" }
+    };
+    renderPerson("iam", cfg.iam.month, cfg.iam.day, cfg.iam.name, cfg.iam.emoji);
+    renderPerson("via", cfg.via.month, cfg.via.day, cfg.via.name, cfg.via.emoji);
+  }
+
+  // Run immediately once
   update();
-  setInterval(update, 1000);
+
+  if (window.birthdayIntervalId) {
+    clearInterval(window.birthdayIntervalId);
+  }
+  window.birthdayIntervalId = setInterval(update, 1000);
 
   // Interactive buttons
   const btnWishIam = document.getElementById("btn-wish-iam");
@@ -608,6 +623,7 @@ function initBirthdays() {
     }, 4000);
   }
 }
+window.initBirthdays = initBirthdays;
 
 /**
  * 5. OUR SONGS - CUSTOM VANILLA JS MUSIC PLAYER

@@ -360,6 +360,84 @@
       </div>
     </section>
 
+    <!-- Synchronous Immediate Birthday Countdown Runner -->
+    <script>
+      (function() {
+        function getNextBirthday(targetMonth, targetDay) {
+          var now = new Date();
+          var currentYear = now.getFullYear();
+          var isToday = (now.getMonth() === targetMonth && now.getDate() === targetDay);
+          var targetDate = new Date(currentYear, targetMonth, targetDay, 0, 0, 0, 0);
+
+          if (now.getTime() >= targetDate.getTime() && !isToday) {
+            targetDate = new Date(currentYear + 1, targetMonth, targetDay, 0, 0, 0, 0);
+          }
+
+          var diffMs = targetDate.getTime() - now.getTime();
+          return { diffMs: diffMs, isToday: isToday };
+        }
+
+        function updateCard(prefix, targetMonth, targetDay, personName, emoji) {
+          var elDays = document.getElementById(prefix + "-days");
+          var elHours = document.getElementById(prefix + "-hours");
+          var elMins = document.getElementById(prefix + "-minutes");
+          var elSecs = document.getElementById(prefix + "-seconds");
+          var elStatus = document.getElementById(prefix + "-status");
+
+          if (!elDays || !elHours || !elMins || !elSecs) return;
+
+          var data = getNextBirthday(targetMonth, targetDay);
+
+          if (data.isToday) {
+            elDays.textContent = "00";
+            elHours.textContent = "00";
+            elMins.textContent = "00";
+            elSecs.textContent = "00";
+            if (elStatus) {
+              elStatus.innerHTML = "🎉 <strong>HARI INI ULANG TAHUN!</strong> Selamat hari lahir " + personName + "! 🎂💖";
+              elStatus.classList.add("is-birthday-today");
+            }
+            return;
+          }
+
+          var remaining = Math.max(0, data.diffMs);
+          var totalSecs = Math.floor(remaining / 1000);
+          var days = Math.floor(totalSecs / 86400);
+          var hours = Math.floor((totalSecs % 86400) / 3600);
+          var minutes = Math.floor((totalSecs % 3600) / 60);
+          var seconds = totalSecs % 60;
+
+          var pad = function(n) { return (n < 10 ? "0" : "") + n; };
+
+          elDays.textContent = pad(days);
+          elHours.textContent = pad(hours);
+          elMins.textContent = pad(minutes);
+          elSecs.textContent = pad(seconds);
+
+          if (elStatus) {
+            elStatus.classList.remove("is-birthday-today");
+            if (days === 0) {
+              elStatus.innerHTML = "⏳ <strong>Kurang dari 24 jam lagi!</strong> Menghitung jam dan menit... 🎁✨";
+            } else {
+              elStatus.innerHTML = "✨ <strong>" + days + " hari lagi</strong> menuju hari istimewa " + personName + " " + emoji;
+            }
+          }
+        }
+
+        function runLiveCountdown() {
+          updateCard("iam", 0, 22, "Pangeran I'am", "👑");
+          updateCard("via", 9, 30, "Tuan Putri Via", "🌸");
+        }
+
+        // Execute immediately right now
+        runLiveCountdown();
+
+        if (window._liveBdayTimer) clearInterval(window._liveBdayTimer);
+        window._liveBdayTimer = setInterval(runLiveCountdown, 1000);
+        window.runLiveCountdown = runLiveCountdown;
+      })();
+    </script>
+
     <!-- SECTION 4: OUR SONGS -->
     <section id="songs" class="songs-section">
       <div class="section-container">
@@ -616,10 +694,20 @@
   <!-- =====================================
        SCRIPTS (Loaded sequentially)
        ===================================== -->
-  <script src="js/gallery.js"></script>
-  <script src="js/anniversary.js"></script>
-  <script src="js/songs.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/gallery.js?v=2.2"></script>
+  <script src="js/anniversary.js?v=2.2"></script>
+  <script src="js/songs.js?v=2.2"></script>
+  <script src="js/timeline.js?v=2.2"></script>
+  <script src="js/main.js?v=2.2"></script>
+  <script>
+    // Global fallback triggers
+    if (typeof window.runLiveCountdown === 'function') {
+      window.runLiveCountdown();
+    }
+    if (typeof window.initBirthdays === 'function') {
+      window.initBirthdays();
+    }
+  </script>
 
 </body>
 </html>

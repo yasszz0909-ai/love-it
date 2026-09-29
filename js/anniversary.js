@@ -1,24 +1,34 @@
 /**
- * OUR LITTLE STORY - Anniversary & Special Dates Data
+ * OUR LITTLE STORY - Anniversary, Special Dates & Birthday Data
  * 
  * ===================================================================
- * HOW TO ADD OR EDIT SPECIAL DATES:
+ * DATA TANGGAL SPESIAL & ULANG TAHUN
  * ===================================================================
- * 
- * You can add as many special dates as you want in the `specialDates` array.
- * 
- * Each date item has the following structure:
- * {
- *   date: "YYYY-MM-DD",                 // Format: Year-Month-Day
- *   title: "Name of the milestone",     // e.g. "First Date", "Partner Birthday"
- *   description: "A sentence or two.",  // Details about what happened
- *   image: "assets/images/photo.jpg"    // Optional: Leave empty string "" if none
- * }
  */
 
-// =====================================
-// DATA TANGGAL SPESIAL
-// =====================================
+// 1. DATA ULANG TAHUN PASANGAN
+const coupleBirthdays = {
+  iam: {
+    id: "iam",
+    name: "Pangeran I'am",
+    month: 0, // 0 = Januari (0-indexed)
+    day: 22,
+    emoji: "👑",
+    title: "PANGERAN • I'AM (YAS)",
+    zodiac: "♒ Aquarius"
+  },
+  via: {
+    id: "via",
+    name: "Tuan Putri Via",
+    month: 9, // 9 = Oktober (0-indexed)
+    day: 30,
+    emoji: "🌸",
+    title: "TUAN PUTRI • VIA",
+    zodiac: "♏ Scorpio"
+  }
+};
+
+// 2. DATA TANGGAL SPESIAL
 const specialDates = [
   {
     date: "2026-11-01",
@@ -27,3 +37,9 @@ const specialDates = [
     image: "assets/images/thum_ultah.jpg"
   }
 ];
+
+// Helper to expose globally for any script or inline runner
+if (typeof window !== "undefined") {
+  window.coupleBirthdays = coupleBirthdays;
+  window.specialDates = specialDates;
+}
