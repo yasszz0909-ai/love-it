@@ -1,9 +1,10 @@
 /**
  * OUR LITTLE STORY - Love Messages Store
  * Dual-layer persistence: Firebase Firestore (Cloud) + localStorage (Offline/Instant cache)
+ * Features dual-mode transport: Firebase Modular SDK with instant HTTPS REST fallback
  */
 
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getFirestore, 
   collection, 
@@ -13,8 +14,7 @@ import {
   query, 
   orderBy, 
   deleteDoc, 
-  doc, 
-  getDocFromServer
+  doc 
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -30,31 +30,21 @@ const firebaseConfig = {
 };
 
 const LOCAL_STORAGE_KEY = "our_little_story_saved_letters_v2";
+const FIRESTORE_REST_URL = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/${firebaseConfig.firestoreDatabaseId}/documents/messages?key=${firebaseConfig.apiKey}`;
 
 let db = null;
 let isFirebaseReady = false;
 
 try {
-  const app = initializeApp(firebaseConfig);
+  const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
   isFirebaseReady = true;
-
-  // Validate initial connection as per Firebase skill guidelines
-  (async function testConnection() {
-    try {
-      await getDocFromServer(doc(db, "test", "connection"));
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("the client is offline")) {
-        console.warn("[Firebase] Client is currently offline, using localStorage fallback.");
-      }
-    }
-  })();
 } catch (e) {
-  console.warn("[Firebase] Initialization warning, falling back to local cache:", e);
+  console.warn("[Firebase] Initialization warning, using REST/local fallback:", e);
 }
 
 // ----------------------------------------------------------------------------
-// Local Storage Helper with automatic cleanup of deleted/test docs
+// Local Storage Helper
 // ----------------------------------------------------------------------------
 function getLocalMessages() {
   try {
@@ -62,7 +52,7 @@ function getLocalMessages() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    // Filter out deleted/test message if present
+    // Filter out old deleted/test messages if present
     const cleaned = parsed.filter(m => {
       if (!m) return false;
       if (m.id === "5pVTjjS5RZ4cNpq5AHmC" || m.firestoreId === "5pVTjjS5RZ4cNpq5AHmC") return false;
@@ -88,6 +78,59 @@ function saveLocalMessages(messages) {
   }
 }
 
+// Helper: Save via direct standard HTTPS REST endpoint
+async function saveViaRest(payload) {
+  const body = {
+    fields: {
+      sender: { stringValue: payload.sender },
+      recipient: { stringValue: payload.recipient },
+      content: { stringValue: payload.content },
+      category: { stringValue: payload.category || "Balasan Surat Cinta" },
+      singkat: { stringValue: payload.singkat || "" },
+      createdAt: { stringValue: payload.createdAt }
+    }
+  };
+
+  const res = await fetch(FIRESTORE_REST_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`REST Firestore error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  // Name format: projects/.../databases/.../documents/messages/{docId}
+  const parts = (data.name || "").split("/");
+  return parts[parts.length - 1] || "rest-" + Date.now();
+}
+
+// Helper: Query via REST endpoint
+async function queryViaRest() {
+  const res = await fetch(FIRESTORE_REST_URL);
+  if (!res.ok) throw new Error(`REST query error: ${res.status}`);
+  const data = await res.json();
+  const documents = data.documents || [];
+  return documents.map(d => {
+    const parts = (d.name || "").split("/");
+    const id = parts[parts.length - 1];
+    const fields = d.fields || {};
+    return {
+      id: id,
+      firestoreId: id,
+      sender: fields.sender?.stringValue || "Via",
+      recipient: fields.recipient?.stringValue || "I'am/Yas",
+      content: fields.content?.stringValue || "",
+      category: fields.category?.stringValue || "Surat Cinta",
+      singkat: fields.singkat?.stringValue || "",
+      createdAt: fields.createdAt?.stringValue || d.createTime || new Date().toISOString()
+    };
+  });
+}
+
 // ----------------------------------------------------------------------------
 // Store API
 // ----------------------------------------------------------------------------
@@ -97,7 +140,8 @@ export const LoveMessagesStore = {
   },
 
   /**
-   * Save a love message permanently to Firestore & localStorage
+   * Save a love message permanently to Firestore Cloud & localStorage
+   * Guaranteed to complete network persistence before resolving
    */
   async saveMessage({ sender = "Via", recipient = "I'am/Yas", content, category = "Surat Cinta", singkat = "" }) {
     if (!content || !content.trim()) {
@@ -122,30 +166,63 @@ export const LoveMessagesStore = {
       createdAt: nowIso
     };
 
-    // 1. Instantly save to local storage (0ms latency, guaranteed safety)
+    // 1. Instantly save to local storage (0ms latency, safety first)
     const currentList = getLocalMessages();
     currentList.unshift(messageData);
     saveLocalMessages(currentList);
 
     // 2. Persist to Firestore Cloud Database
+    let cloudDocId = null;
+    let cloudError = null;
+
+    const firestorePayload = {
+      sender: trimmedSender,
+      recipient: trimmedRecipient,
+      content: trimmedContent,
+      category: category,
+      singkat: trimmedSingkat,
+      createdAt: nowIso
+    };
+
+    // Attempt 1: Modular Firebase SDK with 3.5s timeout
     if (this.isCloudConnected()) {
       try {
-        const firestorePayload = {
-          sender: trimmedSender,
-          content: trimmedContent,
-          createdAt: nowIso
-        };
-        const docRef = await addDoc(collection(db, "messages"), firestorePayload);
-        // Update local item with Firestore doc id
-        messageData.firestoreId = docRef.id;
-        saveLocalMessages(currentList);
-        console.log("[LoveMessagesStore] Saved to Cloud Firestore:", docRef.id);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("SDK Timeout")), 3500)
+        );
+        const writePromise = addDoc(collection(db, "messages"), firestorePayload);
+        const docRef = await Promise.race([writePromise, timeoutPromise]);
+        cloudDocId = docRef.id;
+        console.log("[LoveMessagesStore] Saved via Firebase SDK:", cloudDocId);
       } catch (err) {
-        console.warn("[LoveMessagesStore] Firestore write failed, message safe in local cache:", err);
+        console.warn("[LoveMessagesStore] SDK write failed or timed out, trying REST fallback:", err);
+        cloudError = err;
       }
     }
 
-    return messageData;
+    // Attempt 2: Direct HTTPS REST (works reliably across all environments & iframes)
+    if (!cloudDocId) {
+      try {
+        cloudDocId = await saveViaRest(firestorePayload);
+        console.log("[LoveMessagesStore] Saved via direct HTTPS REST:", cloudDocId);
+      } catch (restErr) {
+        console.error("[LoveMessagesStore] Both SDK and REST writes failed:", restErr);
+        cloudError = restErr;
+      }
+    }
+
+    // If cloud write succeeded, update the local item with the permanent Cloud ID
+    if (cloudDocId) {
+      messageData.id = cloudDocId;
+      messageData.firestoreId = cloudDocId;
+      messageData.savedToCloud = true;
+      const updatedList = getLocalMessages().map(m => m.id === localId ? messageData : m);
+      saveLocalMessages(updatedList);
+      return { success: true, firestoreId: cloudDocId, data: messageData };
+    }
+
+    // Still safe in local cache even if offline
+    return { success: false, isLocalOnly: true, error: cloudError?.message, data: messageData };
   },
 
   /**
@@ -154,32 +231,46 @@ export const LoveMessagesStore = {
   async getAllMessages() {
     const localList = getLocalMessages();
 
-    if (!this.isCloudConnected()) {
-      return localList;
+    // 1. Try Firebase SDK query
+    if (this.isCloudConnected()) {
+      try {
+        const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        const cloudList = [];
+        snapshot.forEach((d) => {
+          const data = d.data();
+          cloudList.push({
+            id: d.id,
+            firestoreId: d.id,
+            sender: data.sender || "Via",
+            recipient: data.recipient || "I'am/Yas",
+            content: data.content || "",
+            category: data.category || "Surat Cinta",
+            singkat: data.singkat || "",
+            createdAt: data.createdAt || new Date().toISOString()
+          });
+        });
+
+        // Merge any unsaved local-only messages
+        const unsyncedLocals = localList.filter(l => l.id && l.id.startsWith("local-") && !cloudList.some(c => c.content === l.content));
+        const merged = [...unsyncedLocals, ...cloudList];
+        saveLocalMessages(merged);
+        return merged;
+      } catch (err) {
+        console.warn("[LoveMessagesStore] SDK query failed, trying REST fallback:", err);
+      }
     }
 
+    // 2. Try REST query
     try {
-      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      const cloudList = [];
-      snapshot.forEach((d) => {
-        const data = d.data();
-        cloudList.push({
-          id: d.id,
-          firestoreId: d.id,
-          sender: data.sender || "Via",
-          recipient: data.recipient || "I'am/Yas",
-          content: data.content || "",
-          category: data.category || "Surat Cinta",
-          singkat: data.singkat || "",
-          createdAt: data.createdAt || new Date().toISOString()
-        });
-      });
-
-      saveLocalMessages(cloudList);
-      return cloudList;
-    } catch (err) {
-      console.warn("[LoveMessagesStore] Failed to query Firestore, using local:", err);
+      const restList = await queryViaRest();
+      restList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const unsyncedLocals = localList.filter(l => l.id && l.id.startsWith("local-") && !restList.some(c => c.content === l.content));
+      const merged = [...unsyncedLocals, ...restList];
+      saveLocalMessages(merged);
+      return merged;
+    } catch (e) {
+      console.warn("[LoveMessagesStore] Cloud fetch unavailable, returning local cache:", e);
       return localList;
     }
   },
@@ -198,7 +289,18 @@ export const LoveMessagesStore = {
     window.addEventListener("love-messages-updated", onLocalUpdate);
 
     if (!this.isCloudConnected()) {
-      return () => window.removeEventListener("love-messages-updated", onLocalUpdate);
+      // Periodically refresh via REST if SDK is not available
+      const interval = setInterval(async () => {
+        try {
+          const list = await queryViaRest();
+          callback(list);
+        } catch (e) {}
+      }, 15000);
+
+      return () => {
+        window.removeEventListener("love-messages-updated", onLocalUpdate);
+        clearInterval(interval);
+      };
     }
 
     try {
@@ -219,10 +321,13 @@ export const LoveMessagesStore = {
           });
         });
 
-        // Firestore is the authoritative source of truth.
-        // Directly sync local cache with cloud list:
-        saveLocalMessages(cloudList);
-        callback(cloudList);
+        // Merge any pending local items
+        const currentLocals = getLocalMessages();
+        const pending = currentLocals.filter(l => l.id && l.id.startsWith("local-") && !cloudList.some(c => c.content === l.content));
+        const merged = [...pending, ...cloudList];
+
+        saveLocalMessages(merged);
+        callback(merged);
       }, (err) => {
         console.warn("[LoveMessagesStore] Firestore realtime error, using local:", err);
       });

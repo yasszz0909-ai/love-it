@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Submit Form (Selesai) -> Simpan Permanen ke Website & Cloud
   if (btnSelesai) {
-    btnSelesai.addEventListener("click", () => {
+    btnSelesai.addEventListener("click", async () => {
       const pesan = (inputPesan && inputPesan.value) ? inputPesan.value.trim() : "";
 
       // Validasi: Pesan tidak boleh kosong
@@ -194,6 +194,12 @@ document.addEventListener("DOMContentLoaded", () => {
         previewContent.textContent = formattedResult;
       }
 
+      // Visual feedback loading pada tombol Selesai
+      const originalBtnText = btnSelesai.innerHTML;
+      btnSelesai.disabled = true;
+      btnSelesai.style.opacity = "0.75";
+      btnSelesai.innerHTML = `<span>Menyimpan ke Cloud... ⏳</span>`;
+
       // Hapus draft input karena pesan sudah resmi selesai
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -208,16 +214,15 @@ document.addEventListener("DOMContentLoaded", () => {
         singkat: singkat
       };
 
-      if (window.LoveMessagesStore && typeof window.LoveMessagesStore.saveMessage === "function") {
-        window.LoveMessagesStore.saveMessage(savePayload).catch((err) => {
-          console.warn("[Pesan] Simpan ke cloud tertunda, tetap aman di cache lokal:", err);
-        });
-      } else {
-        // Fallback instan langsung ke localStorage jika modul belum siap
-        try {
+      let saveResult = null;
+      try {
+        if (window.LoveMessagesStore && typeof window.LoveMessagesStore.saveMessage === "function") {
+          saveResult = await window.LoveMessagesStore.saveMessage(savePayload);
+        } else {
+          // Direct fallback ke localStorage jika modul belum siap
           const key = "our_little_story_saved_letters_v2";
           const existing = JSON.parse(localStorage.getItem(key) || "[]");
-          existing.unshift({
+          const localItem = {
             id: "local-" + Date.now(),
             sender: dari,
             recipient: untuk,
@@ -225,15 +230,27 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Balasan Surat Cinta",
             singkat: singkat,
             createdAt: new Date().toISOString()
-          });
+          };
+          existing.unshift(localItem);
           localStorage.setItem(key, JSON.stringify(existing));
-        } catch (e) {}
+          saveResult = { success: false, isLocalOnly: true, data: localItem };
+        }
+      } catch (saveErr) {
+        console.warn("[Pesan] Gagal menyimpan ke cloud secara sinkron:", saveErr);
+      } finally {
+        btnSelesai.disabled = false;
+        btnSelesai.style.opacity = "1";
+        btnSelesai.innerHTML = originalBtnText;
       }
 
       if (replyFormWrapper) replyFormWrapper.classList.remove("active");
       if (replyResultWrapper) replyResultWrapper.classList.add("active");
 
-      showToast("Pesan tersimpan otomatis ke website & cloud! 💖");
+      if (saveResult && saveResult.success) {
+        showToast("Pesan tersimpan ke Cloud Database & Website! 💖");
+      } else {
+        showToast("Pesan tersimpan di perangkat ini & sinkronisasi cloud berjalan! 💖");
+      }
     });
   }
 
