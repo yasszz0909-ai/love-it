@@ -354,13 +354,8 @@ function initGallery() {
     if (!videoModal || !videoPlayer) return;
 
     // Pause romantic background music if playing so audio does not overlap
-    const audioEl = document.getElementById("audio-source");
-    if (audioEl && !audioEl.paused) {
-      audioEl.pause();
-      const playIcon = document.getElementById("player-play-icon");
-      if (playIcon) playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
-      const playBtn = document.getElementById("player-btn-play");
-      if (playBtn) playBtn.setAttribute("aria-label", "Play");
+    if (window.bgAudioPlayer && !window.bgAudioPlayer.paused) {
+      window.bgAudioPlayer.pause();
     }
 
     videoPlayer.src = encodeURI(videoItem.video);
@@ -461,6 +456,7 @@ function initMusicPlayer() {
   if (typeof songs === "undefined" || songs.length === 0) return;
 
   const audio = new Audio();
+  window.bgAudioPlayer = audio;
   let currentSongIndex = 0;
   let isPlaying = false;
 
